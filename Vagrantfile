@@ -3,11 +3,12 @@
 
 VAGRANTFILE_API_VERSION = "2"
 
-  # Enter Your Github API Token Below. 
+  # Enter Your Magento authentication keys. 
   # If not entered, you must manually run composer to finish the installation.
-  # See http://devdocs.magento.com/guides/v1.0/install-gde/trouble/tshoot_rate-limit.html
-  
-  githubToken = ""
+  # See http://devdocs.magento.com/guides/v2.1/install-gde/prereq/connect-auth.html
+
+  mageRepoPublicKey = ""
+  mageRepoPrivateKey = ""
   
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # All Vagrant configuration is done here. The most common configuration
@@ -20,7 +21,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # box modifications, including memory limits and box name. 
   config.vm.provider "virtualbox" do |vb|
      vb.name = "Magento 2 Vagrant with PHP7 & phpMyAdmin"
-     vb.memory = 4096
+     vb.memory = 3096
 	 vb.cpus = 2
   end
 
@@ -41,12 +42,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # (If experiencing issues, upgrade PowerShell to V 3.0)
   # config.vm.synced_folder ".", "/vagrant", type: "smb"
   
-  config.vm.synced_folder "./magento2", "/var/www/html/magento2/", :mount_options => ["dmode=777", "fmode=777"]
+  #config.vm.synced_folder "./magento2", "/var/www/html/magento2/", :mount_options => ["dmode=777", "fmode=777"]
   
   ## Bootstrap script to provision box.  All installation methods can go here. 
   config.vm.provision "shell" do |s|
     s.path = "bootstrap.sh"
-    s.args   = [githubToken]
+    s.args   = [mageRepoPublicKey, mageRepoPrivateKey]
   end
   
   # If you need to forward ports, you can use this command:

@@ -20,7 +20,9 @@ apt-get -y install apache2
 echo "#######################################"
 echo "##### MAGENTO2 FOLDER PERMISSIONS #####"
 echo "#######################################"
-chmod 0777 -R /var/www/html/magento
+mkdir /var/www/html
+mkdir /var/www/html/magento2
+chmod 0777 -R /var/www/html/magento2
 
 # enable modrewrite
 echo "#######################################"
@@ -155,14 +157,6 @@ echo "###############################"
 curl -sS https://getcomposer.org/installer | php
 mv composer.phar /usr/local/bin/composer
 
-# Set Ownership and Permissions
-echo "#############################################"
-echo "##### SETTING OWNERSHIP AND PERMISSIONS #####"
-echo "#############################################"
-chown -R www-data /var/www/html/magento2/
-find /var/www/html/magento2/ -type d -exec chmod 700 {} \;
-find /var/www/html/magento2/ -type f -exec chmod 600 {} \;
-
 # Magento 2 Installation from composer
 echo "############################################"
 echo "##### INSTALLING COMPOSER DEPENDENDIES #####"
@@ -170,15 +164,27 @@ echo "############################################"
  if [ -z "$1" ]
  	then
  		echo "################################################################"
- 		echo "##### NO GITHUB API TOKEN.  SKIPPING COMPOSER INSTALLATION #####"
+ 		echo "##### NO MAGENTO REPO Access Keys.  SKIPPING COMPOSER INSTALLATION #####"
 		echo "################################################################"
 	else
-		composer config -g github-oauth.github.com $1
 		cd /var/www/html/magento2/
-		composer config repositories.magento composer http://packages.magento.com
-		composer require magento/sample-bundle-all:1.0.0
+		composer config -g http-basic.repo.magento.com $1 $2
+		composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition /var/www/html/magento2/
+		php bin/magento setup:install --base-url=http://magento2.dev/ \
+		--db-host=localhost --db-name=magento --db-user=root \
+		--admin-firstname=Magento --admin-lastname=User --admin-email=user@example.com \
+		--admin-user=admin --admin-password=password1 --backend-frontname=admin \
+		--language=en_US --currency=USD --timezone=America/New_York --use-rewrites=1 --cleanup-database
+		php bin/magento deploy:mode:set developer
 fi
 
+# Set Ownership and Permissions
+echo "#############################################"
+echo "##### SETTING OWNERSHIP AND PERMISSIONS #####"
+echo "#############################################"
+chown -R www-data /var/www/html/magento2/
+find /var/www/html/magento2/ -type d -exec chmod 700 {} \;
+find /var/www/html/magento2/ -type f -exec chmod 600 {} \;
 
 # Restart apache
 echo "#############################"
@@ -193,10 +199,16 @@ if [ -z "$1" ]
 		echo "Final installation instructions:"
 		echo "run 'vagrant ssh'"
 		echo "run 'cd /var/www/html/magento2/'"
-		echo "run 'composer install'"
-		echo "When prompted, enter your github API credentials"
+		echo "run 'composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition /var/www/html/magento2/'"
+		echo "When prompted, enter your Magento REPO Access Keys"
+		echo "run 
+			php bin/magento setup:install --base-url=http://magento2.dev/ \
+			--db-host=localhost --db-name=magento --db-user=root \
+			--admin-firstname=Magento --admin-lastname=User --admin-email=user@example.com \
+			--admin-user=admin --admin-password=password1 --language=en_US \
+			--currency=USD --timezone=America/New_York --use-rewrites=1 --cleanup-database"
 		echo "Afterward finish installation."
 fi
-echo "Go to http://192.168.33.10/magento2/setup/ to finish installation."
-echo "If you configured your hosts file, go to http://www.magento2.dev/setup/"
+echo "Go to http://192.168.33.10/magento2/"
+echo "If you configured your hosts file, go to http://magento2.dev/"
 
