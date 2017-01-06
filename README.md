@@ -46,10 +46,15 @@ Once completed, you can connect via SSH to your virtual machine, with putty for 
 127.0.0.1 and 2222 respectively, but it can change if you have many VMs running at the same time.
 
 **Magento 2 Access**
-Once your VM is running, Magento 2 should be accessible from http://192.168.33.10/
+
+Once your VM is running, you should change your Host file configuration (add row):
+
+    192.168.33.10 magento2.dev
+
+Now your Magento 2 instance should be accessible from http://magento2.dev/
 Admin panel:
 
-    Host: http://192.168.33.10/admin
+    Host: http://magento2.dev/admin
     Login: admin
     Password: password1
 
